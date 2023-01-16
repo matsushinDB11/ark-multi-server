@@ -1,4 +1,4 @@
-# Welcome to your CDK TypeScript project
+# ARK: Survival Evolved multi play server
 
 This is a blank project for CDK development with TypeScript.
 
