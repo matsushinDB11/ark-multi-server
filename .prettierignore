@@ -1,0 +1,7 @@
+package*.json
+cdk.json
+*.md
+tsconfig.json
+cdk.out/
+.prettierrc
+jest.config.js
