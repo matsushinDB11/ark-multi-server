@@ -25,12 +25,6 @@ export class VpcEc2 extends Construct {
       vpcName: 'ark-vpc',
     });
 
-    const keyPair = new CfnKeyPair(this, 'ArkKeyPair', {
-      keyName: 'ark-key',
-      keyType: 'ED25519',
-    });
-    keyPair.applyRemovalPolicy(RemovalPolicy.DESTROY);
-
     const ec2SecurityGroup = new SecurityGroup(this, 'ark-ec2-security-group', {
       vpc: vpc,
       allowAllOutbound: true,
@@ -47,7 +41,6 @@ export class VpcEc2 extends Construct {
       machineImage: new AmazonLinuxImage({
         generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      keyName: Token.asString(keyPair.ref),
       vpcSubnets: vpc.selectSubnets({ subnetType: SubnetType.PUBLIC }),
       securityGroup: ec2SecurityGroup,
     });
