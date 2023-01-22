@@ -1,6 +1,9 @@
 import {
   AmazonLinuxGeneration,
   AmazonLinuxImage,
+  BlockDeviceVolume,
+  CfnKeyPair,
+  EbsDeviceVolumeType,
   Instance,
   InstanceClass,
   InstanceSize,
@@ -13,6 +16,7 @@ import {
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib';
 
 export class VpcEc2 extends Construct {
   constructor(scope: Construct, id: string) {
@@ -41,6 +45,18 @@ export class VpcEc2 extends Construct {
     ec2SecurityGroup.addIngressRule(Peer.anyIpv4(), Port.udp(7778), 'UDP Socket');
     ec2SecurityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(27020), 'RCON');
 
+    const keyPair = new CfnKeyPair(this, 'ArkKeyPair', {
+      keyName: 'ark-key-pair',
+      keyType: 'ed25519',
+    });
+    keyPair.applyRemovalPolicy(RemovalPolicy.DESTROY);
+
+    new CfnOutput(this, 'GetSSHKey', {
+      value: `aws ssm get-parameter --name /ec2/keypair/${keyPair.getAtt(
+        'KeyPairId'
+      )} --with-decryption --query Parameter.Value --output text`,
+    });
+
     const ec2 = new Instance(this, 'ArkEc2', {
       vpc: vpc,
       instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MEDIUM),
@@ -49,6 +65,15 @@ export class VpcEc2 extends Construct {
       }),
       vpcSubnets: vpc.selectSubnets({ subnetType: SubnetType.PUBLIC }),
       securityGroup: ec2SecurityGroup,
+      keyName: keyPair.keyName,
+      blockDevices: [
+        {
+          deviceName: '/dev/xvda',
+          volume: BlockDeviceVolume.ebs(30, {
+            volumeType: EbsDeviceVolumeType.GP3,
+          }),
+        },
+      ],
     });
   }
 }
