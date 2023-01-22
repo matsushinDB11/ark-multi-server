@@ -1,8 +1,6 @@
-import { RemovalPolicy, Token } from 'aws-cdk-lib';
 import {
   AmazonLinuxGeneration,
   AmazonLinuxImage,
-  CfnKeyPair,
   Instance,
   InstanceClass,
   InstanceSize,
@@ -23,6 +21,14 @@ export class VpcEc2 extends Construct {
     const vpc = new Vpc(this, 'ArkVpc', {
       ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
       vpcName: 'ark-vpc',
+      maxAzs: 1,
+      subnetConfiguration: [
+        {
+          cidrMask: 24,
+          name: 'ark-public-subnet-1',
+          subnetType: SubnetType.PUBLIC,
+        },
+      ],
     });
 
     const ec2SecurityGroup = new SecurityGroup(this, 'ark-ec2-security-group', {
