@@ -59,7 +59,7 @@ export class VpcEc2 extends Construct {
 
     const ec2 = new Instance(this, 'ArkEc2', {
       vpc: vpc,
-      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.MEDIUM),
+      instanceType: InstanceType.of(InstanceClass.T3, InstanceSize.LARGE),
       machineImage: new AmazonLinuxImage({
         generation: AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
@@ -69,8 +69,9 @@ export class VpcEc2 extends Construct {
       blockDevices: [
         {
           deviceName: '/dev/xvda',
-          volume: BlockDeviceVolume.ebs(30, {
+          volume: BlockDeviceVolume.ebs(100, {
             volumeType: EbsDeviceVolumeType.GP3,
+            deleteOnTermination: false
           }),
         },
       ],
